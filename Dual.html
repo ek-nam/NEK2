@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>듀얼 브레인 북클럽 실습 보드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #222;
+    }
+    header {
+      padding: 16px 24px;
+      background: linear-gradient(135deg, #4b6cb7, #182848);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      margin: 0 0 4px;
+      font-size: 20px;
+    }
+    header p {
+      margin: 0;
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    main {
+      display: flex;
+      flex-direction: row;
+      gap: 16px;
+      padding: 16px;
+    }
+    @media (max-width: 900px) {
+      main { flex-direction: column; }
+    }
+    .panel {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .left-panel {
+      flex: 1 1 360px;
+      min-width: 0;
+    }
+    .right-panel {
+      flex: 1 1 420px;
+      min-width: 0;
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+    }
+    .section-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+    .activity-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .activity-tab {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #d0d0e0;
+      background: #fafafa;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .activity-tab span.badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #ececff;
+      color: #4242a8;
+    }
+    .activity-tab.active {
+      background: #4b6cb7;
+      color: #fff;
+      border-color: #4b6cb7;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    label {
+      display: block;
+      margin: 8px 0 4px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    input[type="text"], textarea, select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d0d0e0;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 32px;
+    }
+    textarea {
+      min-height: 60px;
+    }
+    input[type="text"]:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: #4b6cb7;
+      box-shadow: 0 0 0 1px rgba(75,108,183,0.15);
+    }
+    .helper {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    .button-row {
+      margin-top: 10px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: #4b6cb7;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: #f0f0f5;
+      color: #333;
+    }
+    .btn-danger {
+      background: #f56565;
+      color: #fff;
+    }
+    .btn-primary:hover { background: #3f5aa0; }
+    .btn-secondary:hover { background: #e2e2ec; }
+    .btn-danger:hover { background: #e25555; }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-row select {
+      width: auto;
+      min-width: 160px;
+    }
+    .responses-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .response-card {
+      border-radius: 12px;
+      border: 1px solid #e0e0ec;
+      padding: 10px 12px;
+      background: #fafafe;
+      font-size: 12px;
+    }
+    .response-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .response-header-left {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #ececff;
+      color: #4242a8;
+      font-size: 11px;
+    }
+    .name-chip {
+      background: #ffe4bc;
+      color: #8b4a08;
+    }
+    .time-chip {
+      background: #e2f7e2;
+      color: #276749;
+    }
+    .response-body {
+      margin-top: 4px;
+    }
+    .qa-block {
+      margin-top: 4px;
+    }
+    .qa-label {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .qa-answer {
+      white-space: pre-wrap;
+    }
+    .empty-state {
+      font-size: 12px;
+      color: #777;
+      margin-top: 12px;
+      text-align: center;
+    }
+    .badge-pill {
+      display: inline-block;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f1f1fa;
+      color: #555;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>듀얼 브레인 북클럽 – 실시간 실습 보드</h1>
+    <p>참여자 답변을 한 화면에서 기록하고 함께 보는 페이지입니다. (이 브라우저에서만 데이터 저장)</p>
+  </header>
+
+  <main>
+    <!-- LEFT: 입력 영역 -->
+    <section class="panel left-panel">
+      <div class="section-title">1. 실습 선택</div>
+      <div class="activity-tabs" id="activityTabs"></div>
+
+      <hr style="border:none;border-top:1px solid #eee;margin:10px 0 12px;" />
+
+      <div>
+        <div class="section-title">2. 참여자 정보</div>
+        <label for="participantName">참여자 이름 또는 이니셜</label>
+        <input type="text" id="participantName" placeholder="예: 김OO / 닉네임도 가능" />
+        <div class="helper">이름을 입력하면 오른쪽 응답 카드에 함께 표시됩니다.</div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid #eee;margin:12px 0 12px;" />
+
+      <div id="questionContainer">
+        <!-- 질문 폼이 JS로 렌더링됩니다 -->
+      </div>
+
+      <div class="button-row">
+        <button class="btn-primary" id="saveResponseBtn">이 답변 저장하기</button>
+        <button class="btn-secondary" id="clearFormBtn">폼 초기화</button>
+      </div>
+    </section>
+
+    <!-- RIGHT: 응답 목록 -->
+    <section class="panel right-panel">
+      <div class="section-title">3. 실시간 응답 모아보기</div>
+      <div class="filter-row">
+        <label for="filterActivity" style="margin:0;font-size:12px;">활동 필터</label>
+        <select id="filterActivity">
+          <option value="all">전체 보기</option>
+        </select>
+        <span class="helper">필터를 변경하면 선택한 실습의 응답만 볼 수 있어요.</span>
+      </div>
+      <div class="button-row" style="margin-top:4px;">
+        <button class="btn-secondary" id="exportJsonBtn">데이터 내보내기 (JSON)</button>
+        <button class="btn-danger" id="clearAllBtn">전체 응답 삭제</button>
+      </div>
+      <div id="responsesList" class="responses-list"></div>
+      <div id="emptyState" class="empty-state">아직 저장된 응답이 없습니다. 왼쪽에서 답변을 작성해 주세요.</div>
+    </section>
+  </main>
+
+  <script>
+    // -------------------------
+    // 데이터 구조 정의
+    // -------------------------
+    const activities = [
+      {
+        id: "ex1",
+        title: "실습 1 - 인간 vs AI",
+        badge: "관점 비교",
+        questions: [
+          {
+            id: "q1",
+            label: "Q1. 40대 이후 삶에서 가장 중요한 것은 무엇인가요? (나의 생각)",
+            placeholder: "예: 건강, 마음의 평온, 배우기, 관계, 돈, 자율성 등"
+          },
+          {
+            id: "q2",
+            label: "Q2. AI의 답변 중 가장 놀라웠던 관점은 무엇인가요?",
+            placeholder: "AI가 말한 내용 중 인상 깊었던 점을 적어보세요."
+          },
+          {
+            id: "q3",
+            label: "Q3. 오늘 이 실습을 통해 얻은 인사이트 한 가지는?",
+            placeholder: "오늘 깨달은 생각이나 감정을 적어보세요."
+          }
+        ]
+      },
+      {
+        id: "ex2",
+        title: "실습 2 - 역할 기반 AI 대화",
+        badge: "역할 부여",
+        questions: [
+          {
+            id: "q1",
+            label: "Q1. 세 가지 역할 중 가장 공감됐던 AI는 무엇이었나요? (감정 코치 / 데이터 분석가 / 철학자)",
+            placeholder: "예: 감정 코치가 제일 위로가 됐어요."
+          },
+          {
+            id: "q2",
+            label: "Q2. 그 이유는 무엇인가요?",
+            placeholder: "왜 그 역할의 AI가 좋았는지, 나의 상황과 연결해 적어보세요."
+          },
+          {
+            id: "q3",
+            label: "Q3. 앞으로 AI에게 어떤 역할을 맡기고 싶나요?",
+            placeholder: "예: 글쓰기 코치, 진로 멘토, 공부 매니저 등"
+          }
+        ]
+      },
+      {
+        id: "ex3",
+        title: "실습 3 - 윤리적 판단 비교",
+        badge: "윤리·판단",
+        questions: [
+          {
+            id: "q1",
+            label: "Q1. 동료의 거짓 보고 상황에서, 나는 어떻게 하고 싶었나요?",
+            placeholder: "당신의 첫 번째 선택과 그 이유를 적어보세요."
+          },
+          {
+            id: "q2",
+            label: "Q2. AI의 조언 중 동의하기 어려웠던 부분은?",
+            placeholder: "AI의 답이 현실과 맞지 않거나, 마음에 걸렸던 부분을 적어보세요."
+          },
+          {
+            id: "q3",
+            label: "Q3. 이 상황에서 '인간 루프'가 꼭 필요하다고 느낀 이유는?",
+            placeholder: "왜 최종 결정은 인간이 내려야 한다고 느꼈는지 적어보세요."
+          }
+        ]
+      },
+      {
+        id: "ex4",
+        title: "감정 나침반 & 마무리",
+        badge: "정리",
+        questions: [
+          {
+            id: "q1",
+            label: "Q1. 오늘 AI와 함께 실습을 하면서 가장 크게 느낀 감정은 무엇인가요?",
+            placeholder: "예: 호기심, 두려움, 안도, 기대감, 가능성 등"
+          },
+          {
+            id: "q2",
+            label: "Q2. 오늘 세션을 한 문장으로 정리한다면?",
+            placeholder: "오늘을 대표하는 나만의 문장을 적어보세요."
+          },
+          {
+            id: "q3",
+            label: "Q3. 앞으로 '듀얼 브레인(나 + AI)'으로 해보고 싶은 일 한 가지는?",
+            placeholder: "예: 책 쓰기, 유튜브 시작, 공부 계획 세우기 등"
+          }
+        ]
+      }
+    ];
+
+    const STORAGE_KEY = "dual_brain_workshop_responses_v1";
+
+    let state = {
+      currentActivityId: "ex1",
+      responses: [] // {id, participant, activityId, activityTitle, answers:[{label, value}], timestamp}
+    };
+
+    // -------------------------
+    // 초기화
+    // -------------------------
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) {
+            state.responses = parsed;
+          }
+        }
+      } catch (e) {
+        console.error("저장된 데이터를 불러오는 중 오류:", e);
+      }
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.responses));
+      } catch (e) {
+        console.error("저장 실패:", e);
+      }
+    }
+
+    function init() {
+      loadFromStorage();
+      renderActivityTabs();
+      renderFilterOptions();
+      renderQuestions();
+      renderResponses();
+      attachEvents();
+    }
+
+    // -------------------------
+    // UI 렌더링
+    // -------------------------
+    function renderActivityTabs() {
+      const container = document.getElementById("activityTabs");
+      container.innerHTML = "";
+      activities.forEach(act => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "activity-tab" + (act.id === state.currentActivityId ? " active" : "");
+        btn.dataset.id = act.id;
+        btn.innerHTML = `
+          <span>${act.title}</span>
+          <span class="badge">${act.badge}</span>
+        `;
+        container.appendChild(btn);
+      });
+    }
+
+    function renderFilterOptions() {
+      const select = document.getElementById("filterActivity");
+      // 기본 옵션 유지 후 나머지 추가
+      const existing = new Set();
+      for (let i = 0; i < select.options.length; i++) {
+        existing.add(select.options[i].value);
+      }
+      activities.forEach(act => {
+        if (!existing.has(act.id)) {
+          const opt = document.createElement("option");
+          opt.value = act.id;
+          opt.textContent = act.title;
+          select.appendChild(opt);
+        }
+      });
+    }
+
+    function renderQuestions() {
+      const container = document.getElementById("questionContainer");
+      const activity = activities.find(a => a.id === state.currentActivityId);
+      if (!activity) return;
+      container.innerHTML = "";
+
+      const info = document.createElement("div");
+      info.className = "helper";
+      info.textContent = `현재 선택된 실습: ${activity.title}`;
+      container.appendChild(info);
+
+      activity.questions.forEach(q => {
+        const label = document.createElement("label");
+        label.htmlFor = `q_${q.id}`;
+        label.textContent = q.label;
+        const textarea = document.createElement("textarea");
+        textarea.id = `q_${q.id}`;
+        textarea.placeholder = q.placeholder || "";
+        container.appendChild(label);
+        container.appendChild(textarea);
+      });
+    }
+
+    function renderResponses() {
+      const listEl = document.getElementById("responsesList");
+      const emptyEl = document.getElementById("emptyState");
+      listEl.innerHTML = "";
+
+      const filterVal = document.getElementById("filterActivity").value;
+      const filtered = state.responses
+        .slice()
+        .sort((a,b) => b.timestamp - a.timestamp)
+        .filter(r => filterVal === "all" ? true : r.activityId === filterVal);
+
+      if (filtered.length === 0) {
+        emptyEl.style.display = "block";
+        return;
+      } else {
+        emptyEl.style.display = "none";
+      }
+
+      filtered.forEach(r => {
+        const card = document.createElement("div");
+        card.className = "response-card";
+
+        const header = document.createElement("div");
+        header.className = "response-header";
+
+        const left = document.createElement("div");
+        left.className = "response-header-left";
+        const actChip = document.createElement("span");
+        actChip.className = "chip";
+        actChip.textContent = r.activityTitle;
+        left.appendChild(actChip);
+
+        if (r.participant) {
+          const nameChip = document.createElement("span");
+          nameChip.className = "chip name-chip";
+          nameChip.textContent = r.participant;
+          left.appendChild(nameChip);
+        }
+
+        const right = document.createElement("div");
+        const date = new Date(r.timestamp);
+        const timeChip = document.createElement("span");
+        timeChip.className = "chip time-chip";
+        timeChip.textContent =
+          `${date.getHours().toString().padStart(2,"0")}:${date.getMinutes().toString().padStart(2,"0")}`;
+        right.appendChild(timeChip);
+
+        header.appendChild(left);
+        header.appendChild(right);
+
+        const body = document.createElement("div");
+        body.className = "response-body";
+
+        r.answers.forEach(ans => {
+          if (!ans.value || ans.value.trim() === "") return;
+          const block = document.createElement("div");
+          block.className = "qa-block";
+          const l = document.createElement("div");
+          l.className = "qa-label";
+          l.textContent = ans.label;
+          const v = document.createElement("div");
+          v.className = "qa-answer";
+          v.textContent = ans.value;
+          block.appendChild(l);
+          block.appendChild(v);
+          body.appendChild(block);
+        });
+
+        card.appendChild(header);
+        card.appendChild(body);
+        listEl.appendChild(card);
+      });
+    }
+
+    // -------------------------
+    // 이벤트
+    // -------------------------
+    function attachEvents() {
+      document.getElementById("activityTabs").addEventListener("click", e => {
+        const btn = e.target.closest(".activity-tab");
+        if (!btn) return;
+        const id = btn.dataset.id;
+        if (!id || id === state.currentActivityId) return;
+        state.currentActivityId = id;
+        renderActivityTabs();
+        renderQuestions();
+      });
+
+      document.getElementById("saveResponseBtn").addEventListener("click", () => {
+        const participant = document.getElementById("participantName").value.trim();
+        const activity = activities.find(a => a.id === state.currentActivityId);
+        if (!activity) return;
+
+        const answers = activity.questions.map(q => {
+          const el = document.getElementById(`q_${q.id}`);
+          return {
+            id: q.id,
+            label: q.label,
+            value: el ? el.value.trim() : ""
+          };
+        });
+
+        const hasContent = answers.some(a => a.value !== "");
+        if (!hasContent) {
+          alert("적어도 하나의 질문에는 답을 적어주세요.");
+          return;
+        }
+
+        const response = {
+          id: Date.now().toString() + "_" + Math.random().toString(36).slice(2),
+          participant,
+          activityId: activity.id,
+          activityTitle: activity.title,
+          answers,
+          timestamp: Date.now()
+        };
+        state.responses.push(response);
+        saveToStorage();
+        renderResponses();
+        alert("답변이 저장되었습니다. 오른쪽에서 함께 볼 수 있어요.");
+      });
+
+      document.getElementById("clearFormBtn").addEventListener("click", () => {
+        const activity = activities.find(a => a.id === state.currentActivityId);
+        if (!activity) return;
+        activity.questions.forEach(q => {
+          const el = document.getElementById(`q_${q.id}`);
+          if (el) el.value = "";
+        });
+      });
+
+      document.getElementById("filterActivity").addEventListener("change", () => {
+        renderResponses();
+      });
+
+      document.getElementById("exportJsonBtn").addEventListener("click", () => {
+        const dataStr = JSON.stringify(state.responses, null, 2);
+        const blob = new Blob([dataStr], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "dual_brain_responses.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById("clearAllBtn").addEventListener("click", () => {
+        if (!confirm("정말로 모든 응답을 삭제할까요? 이 작업은 되돌릴 수 없습니다.")) return;
+        state.responses = [];
+        saveToStorage();
+        renderResponses();
+      });
+    }
+
+    // 시작
+    init();
+  </script>
+</body>
+</html>
